@@ -1,6 +1,6 @@
 <!-- src/components/issues/IssuesList.vue -->
 <script setup>
-import { ref, computed, onMounted } from "vue"
+import { ref, computed, onMounted, watch } from "vue"
 import { getIssues, deleteIssue } from "../services/api"
 import { useToast } from "../services/useToast"
 
@@ -9,6 +9,7 @@ import LoadingState from "../components/LoadingState.vue"
 import EmptyState from "../components/EmptyState.vue"
 import ConfirmDialog from "../components/ui/ConfirmDialog.vue"
 import AppToast from "../components/ui/AppToast.vue"
+import Pagination from "../components/Pagination.vue"
 
 import IssueCard from "./issue-lists/IssueCard.vue"
 import IssueDetailModal from "./issue-lists/IssueDetailModal.vue"
@@ -29,19 +30,21 @@ const selectedIssue = ref(null)
 const showDelete = ref(false)
 const selectedId = ref(null)
 
+const currentPage = ref(1)
+const perPage = 6
+
 const { show, message, type, toast } = useToast()
 
 const loadData = async () => {
   try {
     loading.value = true
-
     const res = await getIssues()
 
     issues.value = Array.isArray(res)
       ? res
       : res?.data ?? []
 
-  } catch (error) {
+  } catch {
     toast("Gagal mengambil data", "error")
   } finally {
     loading.value = false
@@ -71,6 +74,25 @@ const filtered = computed(() => {
     return textMatch && startMatch && endMatch
   })
 })
+
+const totalPages = computed(() =>
+  Math.ceil(filtered.value.length / perPage)
+)
+
+const paginatedData = computed(() => {
+  const start = (currentPage.value - 1) * perPage
+  const end = start + perPage
+  return filtered.value.slice(start, end)
+})
+
+watch([keyword, startDate, endDate], () => {
+  currentPage.value = 1
+})
+
+const changePage = (page) => {
+  if (page < 1 || page > totalPages.value) return
+  currentPage.value = page
+}
 
 const refreshList = async () => {
   await loadData()
@@ -110,7 +132,7 @@ const handleDelete = async () => {
     closeDelete()
     toast("Issue berhasil dihapus", "success")
 
-  } catch (error) {
+  } catch {
     toast("Gagal menghapus data", "error")
   } finally {
     deletingId.value = null
@@ -155,7 +177,7 @@ defineExpose({ refreshList })
     <!-- LIST -->
     <div v-else class="grid md:grid-cols-2 gap-4">
       <IssueCard
-        v-for="item in filtered"
+        v-for="item in paginatedData"
         :key="item.id"
         :item="item"
         :deletingId="deletingId"
@@ -164,6 +186,13 @@ defineExpose({ refreshList })
         @delete="openDelete"
       />
     </div>
+
+    <!-- PAGINATION -->
+    <Pagination
+      :currentPage="currentPage"
+      :totalPages="totalPages"
+      @change-page="changePage"
+    />
 
     <!-- DETAIL -->
     <IssueDetailModal

@@ -43,7 +43,7 @@ defineProps({
                  transition-all duration-200 ease-in-out"
         >
           <PlusCircle class="w-5 h-5" />
-          <span>Tambah Issue</span>
+          <span>Issue</span>
         </router-link>
 
       </nav>
