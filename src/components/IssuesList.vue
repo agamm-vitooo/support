@@ -23,6 +23,7 @@ const deletingId = ref(null)
 const keyword = ref("")
 const startDate = ref("")
 const endDate = ref("")
+const supportName = ref("")
 
 const showModal = ref(false)
 const selectedIssue = ref(null)
@@ -35,9 +36,13 @@ const perPage = 6
 
 const { show, message, type, toast } = useToast()
 
+/* ====================================
+   LOAD DATA
+==================================== */
 const loadData = async () => {
   try {
     loading.value = true
+
     const res = await getIssues()
 
     issues.value = Array.isArray(res)
@@ -53,47 +58,131 @@ const loadData = async () => {
 
 onMounted(loadData)
 
+/* ====================================
+   NORMALIZE TEXT
+==================================== */
+const normalizeText = (text) => {
+  return (text || "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase()
+}
+
+/* ====================================
+   FORMAT NAME
+==================================== */
+const formatName = (text) => {
+  const clean = normalizeText(text)
+
+  return clean.replace(/\b\w/g, (char) =>
+    char.toUpperCase()
+  )
+}
+
+/* ====================================
+   DATE FORMAT
+==================================== */
+const parseDate = (value) => {
+  if (!value) return null
+
+  if (value.includes("-")) {
+    return new Date(value)
+  }
+
+  if (value.includes("/")) {
+    const [d, m, y] = value.split("/")
+    return new Date(`${y}-${m}-${d}`)
+  }
+
+  return new Date(value)
+}
+
+/* ====================================
+   SUPPORT OPTIONS
+   erna / Erna / ERNA => Erna
+==================================== */
+const supportOptions = computed(() => {
+  const unique = new Map()
+
+  issues.value.forEach((item) => {
+    const rawName = item.nama_support
+
+    if (!rawName) return
+
+    const key = normalizeText(rawName)
+
+    if (!unique.has(key)) {
+      unique.set(key, formatName(rawName))
+    }
+  })
+
+  return Array.from(unique.values()).sort()
+})
+
+/* ====================================
+   FILTER
+==================================== */
 const filtered = computed(() => {
-  const key = keyword.value.toLowerCase()
+  const key = normalizeText(keyword.value)
+  const selectedSupport = normalizeText(supportName.value)
 
   return issues.value.filter((item) => {
     const textMatch =
-      item.nama_support?.toLowerCase().includes(key) ||
-      item.title?.toLowerCase().includes(key) ||
-      item.keterangan?.toLowerCase().includes(key) ||
-      item.solusi?.toLowerCase().includes(key)
+      normalizeText(item.nama_support).includes(key) ||
+      normalizeText(item.title).includes(key) ||
+      normalizeText(item.keterangan).includes(key) ||
+      normalizeText(item.solusi).includes(key)
 
-    const issueDate = item.tanggal || ""
+    const issueDate = parseDate(item.tanggal)
+    const start = parseDate(startDate.value)
+    const end = parseDate(endDate.value)
 
     const startMatch =
-      !startDate.value || issueDate >= startDate.value
+      !start || (issueDate && issueDate >= start)
 
     const endMatch =
-      !endDate.value || issueDate <= endDate.value
+      !end || (issueDate && issueDate <= end)
 
-    return textMatch && startMatch && endMatch
+    const supportMatch =
+      !selectedSupport ||
+      normalizeText(item.nama_support) === selectedSupport
+
+    return (
+      textMatch &&
+      startMatch &&
+      endMatch &&
+      supportMatch
+    )
   })
 })
 
+/* ====================================
+   PAGINATION
+==================================== */
 const totalPages = computed(() =>
   Math.ceil(filtered.value.length / perPage)
 )
 
 const paginatedData = computed(() => {
   const start = (currentPage.value - 1) * perPage
-  const end = start + perPage
-  return filtered.value.slice(start, end)
+  return filtered.value.slice(start, start + perPage)
 })
 
-watch([keyword, startDate, endDate], () => {
-  currentPage.value = 1
-})
+watch(
+  [keyword, startDate, endDate, supportName],
+  () => {
+    currentPage.value = 1
+  }
+)
 
 const changePage = (page) => {
   if (page < 1 || page > totalPages.value) return
   currentPage.value = page
 }
 
+/* ====================================
+   ACTION
+==================================== */
 const refreshList = async () => {
   await loadData()
   toast("Data berhasil diperbarui", "success")
@@ -126,7 +215,8 @@ const handleDelete = async () => {
     await deleteIssue(selectedId.value)
 
     issues.value = issues.value.filter(
-      (item) => String(item.id) !== String(selectedId.value)
+      (item) =>
+        String(item.id) !== String(selectedId.value)
     )
 
     closeDelete()
@@ -148,6 +238,7 @@ defineExpose({ refreshList })
 
 <template>
   <div>
+
     <!-- HEADER -->
     <div class="flex items-center justify-between mb-4">
       <h1 class="text-xl font-bold text-gray-800">
@@ -157,7 +248,7 @@ defineExpose({ refreshList })
       <button
         @click="refreshList"
         class="px-3 py-2 text-sm rounded-xl border border-gray-200
-               hover:bg-blue-600 hover:text-white hover:border-blue-600 transition"
+               hover:bg-blue-600 hover:text-white transition"
       >
         Refresh
       </button>
@@ -168,10 +259,14 @@ defineExpose({ refreshList })
       v-model:keyword="keyword"
       v-model:startDate="startDate"
       v-model:endDate="endDate"
+      v-model:supportName="supportName"
+      :supportOptions="supportOptions"
     />
 
+    <!-- LOADING -->
     <LoadingState v-if="loading" />
 
+    <!-- EMPTY -->
     <EmptyState v-else-if="filtered.length === 0" />
 
     <!-- LIST -->
@@ -220,5 +315,6 @@ defineExpose({ refreshList })
       :message="message"
       :type="type"
     />
+
   </div>
 </template>
