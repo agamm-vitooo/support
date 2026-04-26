@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from "vue"
+import { computed, watch } from "vue"
 
 const props = defineProps({
   issues: {
@@ -8,20 +8,34 @@ const props = defineProps({
   }
 })
 
+watch(
+  () => props.issues,
+  (val) => {
+    console.log("DATA:", val)
+    console.log("STATUS:", val.map(i => i.status))
+  },
+  { immediate: true }
+)
+
 const total = computed(() => props.issues.length)
 
-const done = computed(() =>
-  props.issues.filter(i => i.status === "Done").length
+const selesai = computed(() =>
+  props.issues.filter(
+    i => String(i.status).trim().toLowerCase() === "selesai"
+  ).length
 )
 
-const pending = computed(() =>
-  props.issues.filter(i => i.status === "Pending").length
+const progress = computed(() =>
+  props.issues.filter(
+    i => String(i.status).trim().toLowerCase() === "progress"
+  ).length
 )
 
-const supports = computed(() => {
-  const names = props.issues.map(i => i.nama_support).filter(Boolean)
-  return new Set(names).size
-})
+const open = computed(() =>
+  props.issues.filter(
+    i => String(i.status).trim().toLowerCase() === "open"
+  ).length
+)
 </script>
 
 <template>
@@ -29,30 +43,22 @@ const supports = computed(() => {
 
     <div class="bg-white rounded-xl p-3 shadow-sm">
       <p class="text-xs text-gray-500">Total</p>
-      <h2 class="text-xl font-semibold text-gray-800 mt-1">
-        {{ total }}
-      </h2>
+      <h2 class="text-xl font-semibold">{{ total }}</h2>
     </div>
 
     <div class="bg-white rounded-xl p-3 shadow-sm">
-      <p class="text-xs text-gray-500">Done</p>
-      <h2 class="text-xl font-semibold text-green-600 mt-1">
-        {{ done }}
-      </h2>
+      <p class="text-xs text-gray-500">Selesai</p>
+      <h2 class="text-xl font-semibold text-green-600">{{ selesai }}</h2>
     </div>
 
     <div class="bg-white rounded-xl p-3 shadow-sm">
-      <p class="text-xs text-gray-500">Pending</p>
-      <h2 class="text-xl font-semibold text-yellow-500 mt-1">
-        {{ pending }}
-      </h2>
+      <p class="text-xs text-gray-500">Progress</p>
+      <h2 class="text-xl font-semibold text-yellow-500">{{ progress }}</h2>
     </div>
 
     <div class="bg-white rounded-xl p-3 shadow-sm">
-      <p class="text-xs text-gray-500">Support</p>
-      <h2 class="text-xl font-semibold text-blue-600 mt-1">
-        {{ supports }}
-      </h2>
+      <p class="text-xs text-gray-500">Open</p>
+      <h2 class="text-xl font-semibold text-red-600">{{ open }}</h2>
     </div>
 
   </div>

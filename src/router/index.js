@@ -1,7 +1,7 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from "vue-router"
 import Dashboard from "../views/Dashboard.vue"
-import AddIssue from "../views/AddIssue.vue"
+import AddIssue from "../views/Issue.vue"
 
 const routes = [
   { path: "/", component: Dashboard },

@@ -9,19 +9,55 @@ const props = defineProps({
   }
 })
 
+/* =========================
+   STATUS COUNT
+========================= */
+const selesai = computed(() =>
+  props.issues.filter(
+    i => String(i.status || "").trim().toLowerCase() === "selesai"
+  ).length
+)
+
+const progress = computed(() =>
+  props.issues.filter(
+    i => String(i.status || "").trim().toLowerCase() === "progress"
+  ).length
+)
+
+const open = computed(() =>
+  props.issues.filter(
+    i => String(i.status || "").trim().toLowerCase() === "open"
+  ).length
+)
+
+/* =========================
+   CHART SERIES
+========================= */
 const series = computed(() => [
-  props.issues.filter(i => i.status === "Done").length,
-  props.issues.filter(i => i.status === "Pending").length
+  selesai.value,
+  progress.value,
+  open.value
 ])
 
+/* =========================
+   CHART OPTIONS
+========================= */
 const options = computed(() => ({
-  labels: ["Done", "Pending"],
-  colors: ["#22c55e", "#eab308"],
+  chart: {
+    toolbar: {
+      show: false
+    }
+  },
+  labels: ["Selesai", "Progress", "Open"],
+  colors: ["#22c55e", "#eab308", "#ef4444"],
   legend: {
     position: "bottom"
   },
   dataLabels: {
     enabled: true
+  },
+  stroke: {
+    width: 0
   }
 }))
 </script>
@@ -33,10 +69,18 @@ const options = computed(() => ({
     </h2>
 
     <apexchart
+      v-if="issues.length"
       type="donut"
       height="320"
       :options="options"
       :series="series"
     />
+
+    <div
+      v-else
+      class="h-[320px] flex items-center justify-center text-sm text-gray-400"
+    >
+      Belum ada data
+    </div>
   </div>
 </template>

@@ -19,8 +19,14 @@ const loadData = async () => {
 
     const result = await getIssues()
 
-    issues.value = Array.isArray(result) ? result : []
+    console.log("RESULT:", result)
+
+    issues.value = Array.isArray(result.data)
+      ? result.data
+      : []
+
   } catch (err) {
+    console.error(err)
     error.value = "Gagal memuat data dashboard"
   } finally {
     loading.value = false
@@ -31,23 +37,24 @@ onMounted(loadData)
 </script>
 
 <template>
-  <div class="min-h-screen bg-gray-50 p-4 md:p-6">
+  <div class="min-h-screen bg-gray-50 px-3 py-4 sm:px-4 md:px-6">
 
     <!-- HEADER -->
-    <div class="flex items-center justify-between mb-5">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-5">
 
       <div>
-        <h1 class="text-xl font-semibold text-gray-800">
+        <h1 class="text-lg sm:text-xl md:text-2xl font-semibold text-gray-800">
           Dashboard
         </h1>
-        <p class="text-sm text-gray-500">
+
+        <p class="text-xs sm:text-sm text-gray-500 mt-1">
           Monitoring issue & support system
         </p>
       </div>
 
       <button
         @click="loadData"
-        class="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 active:scale-95 transition"
+        class="w-full sm:w-auto px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl shadow-sm hover:bg-blue-700 active:scale-95 transition"
       >
         Refresh
       </button>
@@ -60,39 +67,39 @@ onMounted(loadData)
     <!-- ERROR -->
     <div
       v-else-if="error"
-      class="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4"
+      class="bg-red-50 border border-red-200 text-red-600 rounded-xl p-4 text-sm"
     >
       {{ error }}
     </div>
 
     <!-- CONTENT -->
-    <div v-else class="space-y-6">
+    <div v-else class="space-y-4 md:space-y-6">
 
       <!-- STATS -->
       <StatsCards :issues="issues" />
 
       <!-- CHART ROW -->
-      <div class="grid md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
 
-        <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition">
+        <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
           <StatusChart :issues="issues" />
         </div>
 
-        <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition">
+        <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
           <SupportChart :issues="issues" />
         </div>
 
       </div>
 
       <!-- TREND -->
-      <div class="bg-white rounded-xl p-3 shadow-sm border border-gray-100 hover:shadow-md transition">
+      <div class="bg-white rounded-2xl p-3 sm:p-4 shadow-sm border border-gray-100 hover:shadow-md transition overflow-hidden">
         <TrendChart :issues="issues" />
       </div>
 
       <!-- EMPTY -->
       <div
         v-if="issues.length === 0"
-        class="bg-white rounded-xl p-6 text-center text-gray-500 border border-gray-100"
+        class="bg-white rounded-2xl p-6 text-center text-sm text-gray-500 border border-gray-100"
       >
         Belum ada data issue
       </div>
