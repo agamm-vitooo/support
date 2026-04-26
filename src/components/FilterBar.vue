@@ -20,9 +20,6 @@ const props = defineProps({
     default: () => []
   },
 
-  /* =========================
-     STATUS SESUAI DATA ASLI
-  ========================= */
   statusOptions: {
     type: Array,
     default: () => ["Open", "Progress", "Selesai"]
@@ -70,13 +67,15 @@ const resetFilter = () => {
 
       <!-- SEARCH -->
       <div class="relative xl:col-span-2">
-        <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <Search
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
 
         <input
           :value="keyword"
           @input="emit('update:keyword', $event.target.value)"
           type="text"
-          placeholder="Cari no tiket / keluhan..."
+          placeholder="Cari nomor tiket / kata keluhan..."
           class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-gray-200
                  focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none"
         />
@@ -84,7 +83,9 @@ const resetFilter = () => {
 
       <!-- PIC SUPPORT -->
       <div class="relative">
-        <User class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <User
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
 
         <select
           :value="picSupport"
@@ -126,7 +127,9 @@ const resetFilter = () => {
 
       <!-- START DATE -->
       <div class="relative">
-        <CalendarDays class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <CalendarDays
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
 
         <input
           :value="startDate"
@@ -139,7 +142,9 @@ const resetFilter = () => {
 
       <!-- END DATE -->
       <div class="relative">
-        <CalendarDays class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+        <CalendarDays
+          class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+        />
 
         <input
           :value="endDate"

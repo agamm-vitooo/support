@@ -11,6 +11,7 @@ import IssueForm from "../components/AddIssueForm.vue"
 import ConfirmDialog from "../components/ui/ConfirmDialog.vue"
 import AppToast from "../components/ui/AppToast.vue"
 import FilterBar from "../components/FilterBar.vue"
+import ExportData from "../components/ExportData.vue"
 
 /* =========================
    STATE
@@ -182,6 +183,14 @@ const handleCancelForm = () => {
       @close="showDelete = false"
       @confirm="handleDelete"
     />
+
+    <!-- EXPORT PALING BAWAH -->
+    <div class="flex justify-end pt-4 border-t">
+      <ExportData
+        :all-data="issues"
+        :filtered-data="filteredIssues"
+      />
+    </div>
 
     <!-- TOAST -->
     <AppToast

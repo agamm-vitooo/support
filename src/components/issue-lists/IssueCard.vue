@@ -37,14 +37,21 @@ const emit = defineEmits(["edit", "delete"])
         <!-- TEXT -->
         <div class="min-w-0 flex-1">
 
+          <!-- NOMOR TIKET -->
+          <p class="text-xs text-gray-500">
+            Nomor Tiket :
+          </p>
+
           <p class="font-bold text-gray-800 truncate">
             {{ item.no_tiket }}
           </p>
 
-          <p class="text-sm text-gray-600 mt-1 line-clamp-2">
+          <!-- KELUHAN -->
+          <p class="text-sm text-gray-600 mt-2 line-clamp-2">
             {{ item.keluhan }}
           </p>
 
+          <!-- STATUS -->
           <span
             class="text-xs px-2 py-1 rounded mt-2 inline-block"
             :class="

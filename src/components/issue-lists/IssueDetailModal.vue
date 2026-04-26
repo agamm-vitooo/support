@@ -1,9 +1,9 @@
 <script setup>
-import { ref } from "vue"
+import { ref, watch } from "vue"
 import { X, ZoomIn } from "lucide-vue-next"
 import ImageModal from "./ImageModal.vue"
 
-defineProps({
+const props = defineProps({
   show: Boolean,
   issue: Object
 })
@@ -11,6 +11,14 @@ defineProps({
 const emit = defineEmits(["close"])
 
 const showImage = ref(false)
+
+/* reset image modal saat detail ditutup */
+watch(
+  () => props.show,
+  (val) => {
+    if (!val) showImage.value = false
+  }
+)
 </script>
 
 <template>
@@ -63,9 +71,15 @@ const showImage = ref(false)
           <!-- CONTENT -->
           <div class="p-6 overflow-y-auto space-y-4">
 
-            <h2 class="text-xl font-bold text-gray-800">
-              {{ issue.no_tiket }}
-            </h2>
+            <!-- NOMOR TIKET -->
+            <div>
+              <p class="text-xs text-gray-400 uppercase">
+                Nomor Tiket
+              </p>
+              <h2 class="text-xl font-bold text-gray-800">
+                {{ issue.no_tiket || "-" }}
+              </h2>
+            </div>
 
             <div class="grid md:grid-cols-2 gap-4 text-sm">
 
